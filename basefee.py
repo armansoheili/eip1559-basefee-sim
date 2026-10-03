@@ -78,3 +78,21 @@ def simulate(base_fee_gwei: float, blocks: int, demand_fn, seed: int = 42):
         })
         base_fee = next_base_fee(base_fee, gas_used)
     return history
+
+
+def summarize(history: list) -> dict:
+    """Compact summary stats for a finished ``simulate()`` run.
+
+    Returns min/max/avg base fee (gwei), avg block fullness, total burned
+    (ETH) and total included transactions — handy for comparing scenarios.
+    """
+    fees = [h["base_fee_gwei"] for h in history]
+    return {
+        "blocks": len(history),
+        "min_base_fee_gwei": min(fees),
+        "max_base_fee_gwei": max(fees),
+        "avg_base_fee_gwei": sum(fees) / len(fees),
+        "avg_fullness": sum(h["fullness"] for h in history) / len(history),
+        "total_burned_eth": sum(h["burned_eth"] for h in history),
+        "total_txs": sum(h["txs"] for h in history),
+    }
