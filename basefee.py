@@ -80,6 +80,24 @@ def simulate(base_fee_gwei: float, blocks: int, demand_fn, seed: int = 42):
     return history
 
 
+def print_fee_chart(history: list, width: int = 60, height: int = 12):
+    """Render a tiny ASCII chart of the base fee (gwei) over blocks."""
+    fees = [h["base_fee_gwei"] for h in history]
+    lo, hi = min(fees), max(fees)
+    span = hi - lo if hi > lo else 1.0
+    # Downsample to at most `width` columns.
+    step = max(1, len(fees) // width)
+    cols = [fees[i] for i in range(0, len(fees), step)]
+    for row in range(height, -1, -1):
+        level = lo + span * row / height
+        line = "".join(
+            "#" if f >= level else " "
+            for f in cols
+        )
+        print(f"{level:8.1f} |{line}")
+    print(f"         +{'-' * len(cols)}")
+    print(f"         0{' ' * (len(cols) - 2)}{len(history) - 1} blocks")
+
 def summarize(history: list) -> dict:
     """Compact summary stats for a finished ``simulate()`` run.
 
